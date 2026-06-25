@@ -1,0 +1,20 @@
+{
+    "name": "卡牌计费器",
+    "short_name": "计费器",
+    "description": "双人对战卡牌计费工具，支持回合制费用管理、血量计数、变动记录",
+    "start_url": "./index.html",
+    "scope": "./",
+    "display": "fullscreen",
+    "orientation": "any",
+    "background_color": "#0a0a14",
+    "theme_color": "#0a0a14",
+    "lang": "zh-CN",
+    "icons": [
+        {
+            "src": "icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}

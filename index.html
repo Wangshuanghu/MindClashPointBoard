@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta name="theme-color" content="#0a0a14">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="卡牌计费器">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <link rel="icon" href="icon.svg">
+    <title>卡牌计费器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===== Setup Screen ===== -->
+<div id="setup-screen" class="setup-screen">
+    <div class="setup-content">
+        <h1 class="setup-title">⚔️ 卡牌计费器</h1>
+        <p class="setup-subtitle">设置双方总部血量后开始游戏</p>
+        <div class="setup-players">
+            <div class="setup-player setup-p1">
+                <div class="setup-badge p1-badge">P1</div>
+                <div class="setup-label">正方总部血量</div>
+                <input type="number" id="setup-hp-1" min="1" max="99" value="20" placeholder="1-99" inputmode="numeric">
+            </div>
+            <div class="setup-vs">VS</div>
+            <div class="setup-player setup-p2">
+                <div class="setup-badge p2-badge">P2</div>
+                <div class="setup-label">反方总部血量</div>
+                <input type="number" id="setup-hp-2" min="1" max="99" value="20" placeholder="1-99" inputmode="numeric">
+            </div>
+        </div>
+        <p class="setup-hint">双方血量可不同 · 先手方随机决定 · 安卓可添加到主屏幕当APP用</p>
+        <button id="start-btn" class="start-btn">开始游戏</button>
+    </div>
+</div>
+
+<!-- ===== Game Container ===== -->
+<div id="game-container" class="hidden">
+
+    <!-- Player 2 (Top on mobile / Right on desktop) -->
+    <section class="player-side player-2" id="player2">
+        <div class="tap-zone" data-player="2">
+            <div class="player-header">
+                <div class="header-left">
+                    <div class="player-badge p2-badge" data-first="2"></div>
+                    <span class="player-name">反方</span>
+                </div>
+                <div class="round-badge">R<span data-round="2">1</span></div>
+            </div>
+
+            <!-- HP Bar (prominent) -->
+            <div class="hp-bar" data-player="2">
+                <button class="hp-btn hp-minus" data-hp="2" data-delta="-5">-5</button>
+                <button class="hp-btn hp-minus" data-hp="2" data-delta="-1">-1</button>
+                <div class="hp-display">
+                    <span class="hp-icon">❤</span>
+                    <span class="hp-number" data-hp-num="2">20</span>
+                    <span class="hp-max">/ <span data-hp-max="2">20</span></span>
+                </div>
+                <button class="hp-btn hp-plus" data-hp="2" data-delta="1">+1</button>
+                <button class="hp-btn hp-plus" data-hp="2" data-delta="5">+5</button>
+            </div>
+
+            <!-- Cost + Next Ball -->
+            <div class="cost-row">
+                <div class="cost-display">
+                    <span class="cost-number" data-cost="2">1</span>
+                    <span class="cost-label">可用费用</span>
+                </div>
+                <div class="next-ball" data-next-ball="2">
+                    <span class="next-ball-num" data-next="2">3</span>
+                    <span class="next-ball-label">下回合</span>
+                </div>
+            </div>
+
+            <div class="cost-detail">
+                <span class="detail-item">基础 <strong data-base="2">1</strong></span>
+                <span class="detail-divider"></span>
+                <span class="detail-item">额外 <strong data-bonus="2">0</strong></span>
+                <span class="detail-divider"></span>
+                <span class="detail-item pending" data-pending-wrap="2">待加 <strong data-pending="2">0</strong></span>
+                <span class="detail-divider"></span>
+                <span class="detail-item cost-cap" data-cap="2"></span>
+            </div>
+
+            <div class="sequence-bar" data-sequence="2"></div>
+
+            <div class="turn-indicator" data-turn-indicator="2">
+                <span class="turn-text">等待中</span>
+            </div>
+        </div>
+        <div class="input-section" data-input-section="2">
+            <input type="number" min="1" max="100" placeholder="输入 1-100"
+                   class="cost-input" data-input="2" inputmode="numeric" disabled>
+            <button class="add-btn p2-add" data-add="2" disabled>增加费用</button>
+        </div>
+    </section>
+
+    <!-- Center Divider -->
+    <div class="center-divider">
+        <span class="divider-line"></span>
+        <div class="center-info">
+            <div class="center-turn" id="center-turn">P1 回合</div>
+            <div class="center-round">第 <span id="center-round">1</span> 回合</div>
+            <div class="center-buttons">
+                <button class="center-btn log-btn" id="log-btn">📜记录</button>
+                <button class="center-btn restart-btn" id="restart-btn">↻新局</button>
+                <button class="center-btn reset-btn" id="reset-btn">⨯重开</button>
+            </div>
+        </div>
+        <span class="divider-line"></span>
+    </div>
+
+    <!-- Player 1 (Bottom on mobile / Left on desktop) -->
+    <section class="player-side player-1" id="player1">
+        <div class="tap-zone" data-player="1">
+            <div class="player-header">
+                <div class="header-left">
+                    <div class="player-badge p1-badge" data-first="1"></div>
+                    <span class="player-name">正方</span>
+                </div>
+                <div class="round-badge">R<span data-round="1">1</span></div>
+            </div>
+
+            <div class="hp-bar" data-player="1">
+                <button class="hp-btn hp-minus" data-hp="1" data-delta="-5">-5</button>
+                <button class="hp-btn hp-minus" data-hp="1" data-delta="-1">-1</button>
+                <div class="hp-display">
+                    <span class="hp-icon">❤</span>
+                    <span class="hp-number" data-hp-num="1">20</span>
+                    <span class="hp-max">/ <span data-hp-max="1">20</span></span>
+                </div>
+                <button class="hp-btn hp-plus" data-hp="1" data-delta="1">+1</button>
+                <button class="hp-btn hp-plus" data-hp="1" data-delta="5">+5</button>
+            </div>
+
+            <div class="cost-row">
+                <div class="cost-display">
+                    <span class="cost-number" data-cost="1">1</span>
+                    <span class="cost-label">可用费用</span>
+                </div>
+                <div class="next-ball" data-next-ball="1">
+                    <span class="next-ball-num" data-next="1">3</span>
+                    <span class="next-ball-label">下回合</span>
+                </div>
+            </div>
+
+            <div class="cost-detail">
+                <span class="detail-item">基础 <strong data-base="1">1</strong></span>
+                <span class="detail-divider"></span>
+                <span class="detail-item">额外 <strong data-bonus="1">0</strong></span>
+                <span class="detail-divider"></span>
+                <span class="detail-item pending" data-pending-wrap="1">待加 <strong data-pending="1">0</strong></span>
+                <span class="detail-divider"></span>
+                <span class="detail-item cost-cap" data-cap="1"></span>
+            </div>
+
+            <div class="sequence-bar" data-sequence="1"></div>
+
+            <div class="turn-indicator" data-turn-indicator="1">
+                <span class="turn-text">点击结束回合</span>
+            </div>
+        </div>
+        <div class="input-section" data-input-section="1">
+            <input type="number" min="1" max="100" placeholder="输入 1-100"
+                   class="cost-input" data-input="1" inputmode="numeric" disabled>
+            <button class="add-btn p1-add" data-add="1" disabled>增加费用</button>
+        </div>
+    </section>
+</div>
+
+<!-- ===== Round Transition Overlay ===== -->
+<div id="round-overlay" class="round-overlay hidden">
+    <div class="round-overlay-content">
+        <div class="overlay-label">新回合</div>
+        <div class="overlay-round">第 <span id="overlay-round">2</span> 回合</div>
+        <div class="overlay-cost">基础费用 <span id="overlay-cost">3</span></div>
+        <div class="overlay-turn">P<span id="overlay-first">1</span> 先手</div>
+    </div>
+</div>
+
+<!-- ===== Log Panel ===== -->
+<div id="log-panel" class="log-panel hidden">
+    <div class="log-panel-header">
+        <h2>📜 变动记录</h2>
+        <button class="log-close" id="log-close">✕</button>
+    </div>
+    <div class="log-panel-body" id="log-body"></div>
+    <div class="log-panel-footer">
+        <div class="log-stats">
+            <span>总回合数: <strong id="log-total-rounds">1</strong></span>
+            <span>P1 费用: <strong id="log-p1-cost">1</strong> · HP: <strong id="log-p1-hp">20</strong></span>
+            <span>P2 费用: <strong id="log-p2-cost">1</strong> · HP: <strong id="log-p2-hp">20</strong></span>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Toast ===== -->
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
